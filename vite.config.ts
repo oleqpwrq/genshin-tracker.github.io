@@ -6,7 +6,7 @@ import path from 'path'
 export default defineConfig({
   plugins: [react()],
   assetsInclude: ['**/*.png', '**/*.jpg', '**/*.svg'],
-  base: '/genshin-tracker/',
+  base: '/genshin-tracker.github.io/',
   resolve: {
     alias: {
       '@images': path.resolve(__dirname, '@images')

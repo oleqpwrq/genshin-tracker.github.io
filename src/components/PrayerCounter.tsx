@@ -27,18 +27,18 @@ export const PrayerCounter: React.FC = () => {
     {
       id: 'event',
       name: 'Ивентовый баннер',
-      images: ['/genshin-tracker/images/banner-1.png'],
+      images: ['/genshin-tracker.github.io/images/banner-1.png'],
       count: 0,
       characters: [
-        { name: 'Эскофье', image: '/genshin-tracker/images/banner-1.png' },
-        { name: 'Навия', image: '/genshin-tracker/images/banner-2.png' }
+        { name: 'Эскофье', image: '/genshin-tracker.github.io/images/banner-1.png' },
+        { name: 'Навия', image: '/genshin-tracker.github.io/images/banner-2.png' }
       ],
       currentCharacterIndex: 0
     },
     {
       id: 'standard',
       name: 'Стандартный баннер',
-      images: ['/genshin-tracker/images/standard-banner.png'],
+      images: ['/genshin-tracker.github.io/images/standard-banner.png'],
       count: 0
     }
   ]);

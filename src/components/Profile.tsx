@@ -18,8 +18,8 @@ export const Profile: React.FC<ProfileProps> = ({ onBlurChange, currentBlur }) =
   const [settings, setSettings] = useState<ProfileSettings>(() => {
     const saved = localStorage.getItem('profileSettings');
     return saved ? JSON.parse(saved) : {
-      avatar: '/genshin-tracker/images/banner-1.png',
-      background: '/genshin-tracker/images/backgrounds/anime-genshin-impact-genshin-impact-1572562.jpg',
+      avatar: '/genshin-tracker.github.io/images/banner-1.png',
+      background: '/genshin-tracker.github.io/images/backgrounds/anime-genshin-impact-genshin-impact-1572562.jpg',
       customBackground: null
     };
   });
@@ -92,18 +92,18 @@ export const Profile: React.FC<ProfileProps> = ({ onBlurChange, currentBlur }) =
               onChange={handleBackgroundChange}
               style={{ width: '200px' }}
             >
-              <Select.Option value="/genshin-tracker/images/backgrounds/anime-genshin-impact-genshin-impact-1572562.jpg">
+              <Select.Option value="/genshin-tracker.github.io/images/backgrounds/anime-genshin-impact-genshin-impact-1572562.jpg">
                 Фон 1
               </Select.Option>
-              <Select.Option value="/genshin-tracker/images/backgrounds/genshin_town_nature_beauty_genshin_impact_wallpaper_2400x1350_50.jpg">
+              <Select.Option value="/genshin-tracker.github.io/images/backgrounds/genshin_town_nature_beauty_genshin_impact_wallpaper_2400x1350_50.jpg">
                 Фон 2
               </Select.Option>
-              <Select.Option value="/genshin-tracker/images/backgrounds/1645057674_5-abrakadabra-fun-p-fon-v-stim-genshin-5.jpg">
+              <Select.Option value="/genshin-tracker.github.io/images/backgrounds/1645057674_5-abrakadabra-fun-p-fon-v-stim-genshin-5.jpg">
                 Фон 3
               </Select.Option>
-              <Select.Option value="/genshin-tracker/images/banner-1.png">Баннер 1</Select.Option>
-              <Select.Option value="/genshin-tracker/images/banner-2.png">Баннер 2</Select.Option>
-              <Select.Option value="/genshin-tracker/images/standard-banner.png">Стандартный баннер</Select.Option>
+              <Select.Option value="/genshin-tracker.github.io/images/banner-1.png">Баннер 1</Select.Option>
+              <Select.Option value="/genshin-tracker.github.io/images/banner-2.png">Баннер 2</Select.Option>
+              <Select.Option value="/genshin-tracker.github.io/images/standard-banner.png">Стандартный баннер</Select.Option>
             </Select>
           </div>
 
