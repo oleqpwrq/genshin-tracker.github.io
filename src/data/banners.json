@@ -1,0 +1,19 @@
+{
+  "event": {
+    "name": "Ивентовый баннер",
+    "characters": [
+      {
+        "name": "Эскофье",
+        "image": "/genshin-tracker/images/event-banner-1.png"
+      },
+      {
+        "name": "Навия",
+        "image": "/genshin-tracker/images/event-banner-2.png"
+      }
+    ]
+  },
+  "standard": {
+    "name": "Стандартный баннер",
+    "image": "/genshin-tracker/images/standard-banner.png"
+  }
+} 
