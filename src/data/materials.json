@@ -1,0 +1,293 @@
+{
+    "characters": {
+      "Райден": {
+        "ascension": {
+          "total": {
+            "mora_ascension": 420000,
+            "materials": {
+              "elemental_gems": {
+                "осколок": 1,
+                "фрагмент": 9,
+                "кусок": 9,
+                "драгоценный_камень": 6
+              },
+              "boss_material": {
+                "name": "Молниеносная призма",
+                "count": 46
+              },
+              "local_specialty": {
+                "name": "Амакумо",
+                "count": 168
+              },
+              "mob_drops": {
+                "старинный_гарда": 18,
+                "кагэути_гарда": 30,
+                "знаменитый_гарда": 36
+              }
+            }
+          }
+        },
+        "talents": {
+          "total": {
+            "mora_talents": 4957500,
+            "materials": {
+              "talent_books": {
+                "учения_о_«Свете»": 9,
+                "указания_о_«Свете»": 63,
+                "философия_о_«Свете»": 114
+              },
+              "mob_drops_talents": {
+                "старинный_гарда": 18,
+                "кагэути_гарда": 66,
+                "знаменитый_гарда": 93
+              },
+              "weekly_boss": {
+                "name": "Мгновение расплавленного",
+                "count": 18
+              },
+              "crown_of_insight": 3
+            }
+          }
+        },
+        "experience": {
+          "total": {
+            "mora_experience": 1672000,
+            "books": {
+              "опыт_героя": 421
+            }
+          }
+        }
+      },
+      "Ху Тао": {
+        "ascension": {
+          "total": {
+            "mora_ascension": 420000,
+            "materials": {
+              "elemental_gems": {
+                "осколок": 1,
+                "фрагмент": 9,
+                "кусок": 9,
+                "драгоценный_камень": 6
+              },
+              "boss_material": {
+                "name": "Незрелый нефрит",
+                "count": 46
+              },
+              "local_specialty": {
+                "name": "Шелковый цветок",
+                "count": 168
+              },
+              "mob_drops": {
+                "нектар_цветка": 18,
+                "мерцающий_нектар": 30,
+                "энергетический_нектар": 36
+              }
+            }
+          }
+        },
+        "talents": {
+          "total": {
+            "mora_talents": 4957500,
+            "materials": {
+              "talent_books": {
+                "учения_о_«Усердии»": 9,
+                "указания_о_«Усердии»": 63,
+                "философия_о_«Усердии»": 114
+              },
+              "mob_drops_talents": {
+                "нектар_цветка": 18,
+                "мерцающий_нектар": 66,
+                "энергетический_нектар": 93
+              },
+              "weekly_boss": {
+                "name": "Мгновение расплавленного",
+                "count": 18
+              },
+              "crown_of_insight": 3
+            }
+          }
+        },
+        "experience": {
+          "total": {
+            "mora_experience": 1672000,
+            "books": {
+              "опыт_героя": 421
+            }
+          }
+        }
+      },
+      "Xiao": {
+        "ascension": {
+          "total": {
+            "mora_ascension": 420000,
+            "materials": {
+              "elemental_gems": {
+                "green": 1,
+                "blue": 9,
+                "purple": 9,
+                "gold": 6
+              },
+              "boss_material": {
+                "name": "Слеза Борея",
+                "count": 46
+              },
+              "local_specialty": {
+                "name": "Цинсинь",
+                "count": 168
+              },
+              "mob_drops": {
+                "green": 18,
+                "blue": 30,
+                "purple": 36
+              }
+            }
+          }
+        },
+        "talents": {
+          "total": {
+            "mora_talents": 4957500,
+            "materials": {
+              "talent_books": {
+                "green": 27,
+                "blue": 189,
+                "purple": 342
+              },
+              "mob_drops_talents": {
+                "green": 18,
+                "blue": 66,
+                "purple": 93
+              },
+              "weekly_boss": {
+                "name": "Корона прозрения",
+                "count": 3
+              }
+            }
+          }
+        },
+        "experience": {
+          "total": {
+            "mora_experience": 1672000,
+            "books": {
+              "hero_wit": 421
+            }
+          }
+        }
+      }
+    },
+    "crafting": {
+      "elemental_gems": {
+        "green_to_blue": {
+          "input": {
+            "green": 3
+          },
+          "output": {
+            "blue": 1
+          },
+          "mora_cost": 100
+        },
+        "blue_to_purple": {
+          "input": {
+            "blue": 3
+          },
+          "output": {
+            "purple": 1
+          },
+          "mora_cost": 100
+        },
+        "purple_to_gold": {
+          "input": {
+            "purple": 3
+          },
+          "output": {
+            "gold": 1
+          },
+          "mora_cost": 100
+        }
+      },
+      "mob_drops": {
+        "green_to_blue": {
+          "input": {
+            "green": 3
+          },
+          "output": {
+            "blue": 1
+          },
+          "mora_cost": 50
+        },
+        "blue_to_purple": {
+          "input": {
+            "blue": 3
+          },
+          "output": {
+            "purple": 1
+          },
+          "mora_cost": 50
+        }
+      },
+      "mob_drops_talents": {
+          "green_to_blue": {
+            "input": {
+              "green": 3
+            },
+            "output": {
+              "blue": 1
+            },
+            "mora_cost": 50
+          },
+          "blue_to_purple": {
+            "input": {
+              "blue": 3
+            },
+            "output": {
+              "purple": 1
+            },
+            "mora_cost": 50
+          }
+        },
+      "talent_books": {
+        "green_to_blue": {
+          "input": {
+            "green": 3
+          },
+          "output": {
+            "blue": 1
+          },
+          "mora_cost": 50
+        },
+        "blue_to_purple": {
+          "input": {
+            "blue": 3
+          },
+          "output": {
+            "purple": 1
+          },
+          "mora_cost": 50
+        }
+      }
+    },
+    "weapons": {
+      "Engulfing Lightning": {
+        "ascension": {
+          "total": {
+            "mora": 5000,
+            "materials": {
+              "dungeon_materials": {
+                "green": 5,
+                "blue": 14,
+                "purple": 14
+              },
+              "mob_drops_weapon": {
+                "green": 10,
+                "blue": 15,
+                "purple": 23
+              },
+              "weapon_ascension": {
+                "name": "Зубец архаического камня",
+                "count": 23
+              }
+            }
+          }
+        }
+      }
+    }
+  } 
