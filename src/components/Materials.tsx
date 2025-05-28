@@ -7,6 +7,12 @@ interface MaterialProgress {
   };
 }
 
+interface CompletedSections {
+  [key: string]: {
+    [section: string]: boolean;
+  };
+}
+
 interface MaterialsData {
   type: 'character' | 'weapon';
   name: string;
@@ -136,17 +142,21 @@ interface MaterialsJsonData {
     [key: string]: {
       ascension: {
         total: {
-          mora: number;
+          mora_ascension: number;
           materials: {
-            dungeon_materials: {
+            elemental_gems: {
               [key: string]: number;
             };
-            mob_drops_weapon: {
-              [key: string]: number;
-            };
-            weapon_ascension: {
+            boss_material: {
               name: string;
               count: number;
+            };
+            local_specialty: {
+              name: string;
+              count: number;
+            };
+            mob_drops: {
+              [key: string]: number;
             };
           };
         };
@@ -194,10 +204,11 @@ function calculateMaterialDistribution(
       const total = progress[itemName]?.[key] || 0;
       const ascensionRequired = required as number;
       const talentRequired = talentDrops[key] || 0;
+      const talentValue = progress[itemName]?.[`${key}_talents`] || 0;
 
       const ascensionUsed = Math.min(total, ascensionRequired);
       const remaining = total - ascensionUsed;
-      const talentUsed = Math.min(remaining, talentRequired);
+      const talentUsed = talentValue;
 
       distribution[key] = {
         total,
@@ -218,6 +229,156 @@ function calculateCraftedMaterials(
   distribution: MaterialDistribution
 ): CraftedMaterials {
   const result: CraftedMaterials = {};
+
+  // Обработка книг талантов
+  if (materials.talent_books) {
+    const books = materials.talent_books;
+    
+    const green = progress[itemName]?.['учения_о_«Соперничестве»'] || 0;
+    const blue = progress[itemName]?.['указания_о_«Соперничестве»'] || 0;
+    const purple = progress[itemName]?.['философия_о_«Соперничестве»'] || 0;
+
+    const greenRequired = books['учения_о_«Соперничестве»'] || 0;
+    const blueRequired = books['указания_о_«Соперничестве»'] || 0;
+    const purpleRequired = books['философия_о_«Соперничестве»'] || 0;
+
+    const greenCrafting = getConvertedAmount(green, greenRequired);
+    const blueTotal = blue + greenCrafting.converted;
+    const blueCrafting = getConvertedAmount(blueTotal, blueRequired);
+    const purpleTotal = purple + blueCrafting.converted;
+
+    result['учения_о_«Соперничестве»'] = {
+      actual: green,
+      crafted: 0,
+      required: greenRequired,
+      remaining: greenCrafting.remaining,
+      tooltip: greenCrafting.converted > 0
+        ? `Остаток: ${greenCrafting.remaining} учений → ${greenCrafting.converted} указаний`
+        : green < greenRequired
+          ? 'Недостаточно, чтобы скрафтить следующий уровень'
+          : ''
+    };
+
+    result['указания_о_«Соперничестве»'] = {
+      actual: blue,
+      crafted: greenCrafting.converted,
+      required: blueRequired,
+      remaining: blueCrafting.remaining,
+      tooltip: blueCrafting.converted > 0
+        ? `Остаток: ${blueCrafting.remaining} указаний → ${blueCrafting.converted} философий`
+        : blueTotal < blueRequired
+          ? 'Недостаточно, чтобы скрафтить следующий уровень'
+          : ''
+    };
+
+    result['философия_о_«Соперничестве»'] = {
+      actual: purple,
+      crafted: blueCrafting.converted,
+      required: purpleRequired,
+      remaining: 0,
+      tooltip: ''
+    };
+  }
+
+  // Обработка дропа с мобов для талантов
+  if (materials.mob_drops_talents) {
+    const drops = materials.mob_drops_talents;
+    
+    const green = progress[itemName]?.['сцепляющая_шестерня_talents'] || 0;
+    const blue = progress[itemName]?.['изощренная_шестерня_talents'] || 0;
+    const purple = progress[itemName]?.['шестерня_механизма_talents'] || 0;
+
+    const greenRequired = drops['сцепляющая_шестерня'] || 0;
+    const blueRequired = drops['изощренная_шестерня'] || 0;
+    const purpleRequired = drops['шестерня_механизма'] || 0;
+
+    const greenCrafting = getConvertedAmount(green, greenRequired);
+    const blueTotal = blue + greenCrafting.converted;
+    const blueCrafting = getConvertedAmount(blueTotal, blueRequired);
+    const purpleTotal = purple + blueCrafting.converted;
+
+    result['сцепляющая_шестерня_talents'] = {
+      actual: green,
+      crafted: 0,
+      required: greenRequired,
+      remaining: greenCrafting.remaining,
+      tooltip: greenCrafting.converted > 0
+        ? `Остаток: ${greenCrafting.remaining} сцепляющих шестерен → ${greenCrafting.converted} изощренных шестерен`
+        : green < greenRequired
+          ? 'Недостаточно, чтобы скрафтить следующий уровень'
+          : ''
+    };
+
+    result['изощренная_шестерня_talents'] = {
+      actual: blue,
+      crafted: greenCrafting.converted,
+      required: blueRequired,
+      remaining: blueCrafting.remaining,
+      tooltip: blueCrafting.converted > 0
+        ? `Остаток: ${blueCrafting.remaining} изощренных шестерен → ${blueCrafting.converted} шестерен механизма`
+        : blueTotal < blueRequired
+          ? 'Недостаточно, чтобы скрафтить следующий уровень'
+          : ''
+    };
+
+    result['шестерня_механизма_talents'] = {
+      actual: purple,
+      crafted: blueCrafting.converted,
+      required: purpleRequired,
+      remaining: 0,
+      tooltip: ''
+    };
+  }
+
+  // Обработка дропа с мобов для возвышения
+  if (materials.mob_drops) {
+    const drops = materials.mob_drops;
+    
+    const green = progress[itemName]?.['сцепляющая_шестерня'] || 0;
+    const blue = progress[itemName]?.['изощренная_шестерня'] || 0;
+    const purple = progress[itemName]?.['шестерня_механизма'] || 0;
+
+    const greenRequired = drops['сцепляющая_шестерня'] || 0;
+    const blueRequired = drops['изощренная_шестерня'] || 0;
+    const purpleRequired = drops['шестерня_механизма'] || 0;
+
+    const greenCrafting = getConvertedAmount(green, greenRequired);
+    const blueTotal = blue + greenCrafting.converted;
+    const blueCrafting = getConvertedAmount(blueTotal, blueRequired);
+    const purpleTotal = purple + blueCrafting.converted;
+
+    result['сцепляющая_шестерня'] = {
+      actual: green,
+      crafted: 0,
+      required: greenRequired,
+      remaining: greenCrafting.remaining,
+      tooltip: greenCrafting.converted > 0
+        ? `Остаток: ${greenCrafting.remaining} сцепляющих шестерен → ${greenCrafting.converted} изощренных шестерен`
+        : green < greenRequired
+          ? 'Недостаточно, чтобы скрафтить следующий уровень'
+          : ''
+    };
+
+    result['изощренная_шестерня'] = {
+      actual: blue,
+      crafted: greenCrafting.converted,
+      required: blueRequired,
+      remaining: blueCrafting.remaining,
+      tooltip: blueCrafting.converted > 0
+        ? `Остаток: ${blueCrafting.remaining} изощренных шестерен → ${blueCrafting.converted} шестерен механизма`
+        : blueTotal < blueRequired
+          ? 'Недостаточно, чтобы скрафтить следующий уровень'
+          : ''
+    };
+
+    result['шестерня_механизма'] = {
+      actual: purple,
+      crafted: blueCrafting.converted,
+      required: purpleRequired,
+      remaining: 0,
+      tooltip: ''
+    };
+  }
 
   // Обработка элементальных камней
   if (materials.elemental_gems) {
@@ -284,129 +445,6 @@ function calculateCraftedMaterials(
     };
   }
 
-  // Обработка книг талантов
-  if (materials.talent_books) {
-    const books = materials.talent_books;
-    
-    const green = progress[itemName]?.['учения'] || 0;
-    const blue = progress[itemName]?.['указания'] || 0;
-    const purple = progress[itemName]?.['философия'] || 0;
-
-    const greenRequired = books['учения'] || 0;
-    const blueRequired = books['указания'] || 0;
-    const purpleRequired = books['философия'] || 0;
-
-    const greenCrafting = getConvertedAmount(green, greenRequired);
-    const blueTotal = blue + greenCrafting.converted;
-    const blueCrafting = getConvertedAmount(blueTotal, blueRequired);
-    const purpleTotal = purple + blueCrafting.converted;
-
-    result['учения'] = {
-      actual: green,
-      crafted: 0,
-      required: greenRequired,
-      remaining: greenCrafting.remaining,
-      tooltip: greenCrafting.converted > 0
-        ? `Остаток: ${greenCrafting.remaining} учений → ${greenCrafting.converted} указаний`
-        : green < greenRequired
-          ? 'Недостаточно, чтобы скрафтить следующий уровень'
-          : ''
-    };
-
-    result['указания'] = {
-      actual: blue,
-      crafted: greenCrafting.converted,
-      required: blueRequired,
-      remaining: blueCrafting.remaining,
-      tooltip: blueCrafting.converted > 0
-        ? `Остаток: ${blueCrafting.remaining} указаний → ${blueCrafting.converted} философий`
-        : blueTotal < blueRequired
-          ? 'Недостаточно, чтобы скрафтить следующий уровень'
-          : ''
-    };
-
-    result['философия'] = {
-      actual: purple,
-      crafted: blueCrafting.converted,
-      required: purpleRequired,
-      remaining: 0,
-      tooltip: ''
-    };
-  }
-
-  // Обработка дропа с мобов
-  if (materials.mob_drops) {
-    const drops = materials.mob_drops;
-    
-    const green = progress[itemName]?.['старинный_гарда'] || 0;
-    const blue = progress[itemName]?.['кагэути_гарда'] || 0;
-    const purple = progress[itemName]?.['знаменитый_гарда'] || 0;
-
-    const greenRequired = drops['старинный_гарда'] || 0;
-    const blueRequired = drops['кагэути_гарда'] || 0;
-    const purpleRequired = drops['знаменитый_гарда'] || 0;
-
-    const greenCrafting = getConvertedAmount(green, greenRequired);
-    const blueTotal = blue + greenCrafting.converted;
-    const blueCrafting = getConvertedAmount(blueTotal, blueRequired);
-    const purpleTotal = purple + blueCrafting.converted;
-
-    result['старинный_гарда'] = {
-      actual: green,
-      crafted: 0,
-      required: greenRequired,
-      remaining: greenCrafting.remaining,
-      tooltip: greenCrafting.converted > 0
-        ? `Остаток: ${greenCrafting.remaining} старинных гарда → ${greenCrafting.converted} кагэути гарда`
-        : green < greenRequired
-          ? 'Недостаточно, чтобы скрафтить следующий уровень'
-          : ''
-    };
-
-    result['кагэути_гарда'] = {
-      actual: blue,
-      crafted: greenCrafting.converted,
-      required: blueRequired,
-      remaining: blueCrafting.remaining,
-      tooltip: blueCrafting.converted > 0
-        ? `Остаток: ${blueCrafting.remaining} кагэути гарда → ${blueCrafting.converted} знаменитых гарда`
-        : blueTotal < blueRequired
-          ? 'Недостаточно, чтобы скрафтить следующий уровень'
-          : ''
-    };
-
-    result['знаменитый_гарда'] = {
-      actual: purple,
-      crafted: blueCrafting.converted,
-      required: purpleRequired,
-      remaining: 0,
-      tooltip: ''
-    };
-  }
-
-  // Обработка опыта персонажа
-  if (materials.experience) {
-    const exp = materials.experience;
-    const hero = progress[itemName]?.['опыт_героя'] || 0;
-    const adventurer = progress[itemName]?.['приключенческий_опыт'] || 0;
-    const wanderer = progress[itemName]?.['совет_странника'] || 0;
-
-    const heroRequired = exp['опыт_героя'] || 0;
-    const adventurerRequired = exp['приключенческий_опыт'] || 0;
-    const wandererRequired = exp['совет_странника'] || 0;
-
-    const totalExp = hero + Math.floor(adventurer * 5 / 20) + Math.floor(wanderer / 20);
-    const totalRequired = heroRequired + Math.floor(adventurerRequired * 5 / 20) + Math.floor(wandererRequired / 20);
-
-    result['опыт_персонажа'] = {
-      actual: totalExp,
-      crafted: 0,
-      required: totalRequired,
-      remaining: 0,
-      tooltip: `Опыт героя: ${hero}\nПутешественника: ${adventurer}\nСовет странника: ${wanderer}\n→ Всего: ${totalExp} опыта героя`
-    };
-  }
-
   return result;
 }
 
@@ -415,13 +453,64 @@ function renderMaterialBlock(
   materials: any,
   progress: MaterialProgress,
   itemName: string,
-  updateProgress: (itemName: string, matKey: string, value: number) => void
+  updateProgress: (itemName: string, matKey: string, value: number) => void,
+  completedSections: CompletedSections,
+  onCompleteSection: (itemName: string, section: string) => void,
+  onEditSection: (itemName: string, section: string) => void
 ) {
   const distribution = calculateMaterialDistribution(progress, itemName, materials);
   const craftedMaterials = calculateCraftedMaterials(progress, itemName, materials, distribution);
 
+  const isCompleted = completedSections[itemName]?.[title] || false;
+
+  // Проверяем, все ли ресурсы собраны
+  const allResourcesCollected = Object.entries(materials).every(([key, value]) => {
+    if (typeof value === 'object' && value !== null) {
+      if ('name' in value && 'count' in value) {
+        const count = (value as { count: number }).count;
+        return (progress[itemName]?.[key] || 0) >= count;
+      } else {
+        return Object.entries(value).every(([subKey, subValue]) => {
+          const isTalentMaterial = key === 'mob_drops_talents';
+          const materialKey = isTalentMaterial ? `${subKey}_talents` : subKey;
+          const currentValue = progress[itemName]?.[materialKey] || 0;
+          const crafted = craftedMaterials[materialKey];
+          const totalValue = crafted ? currentValue + crafted.crafted : currentValue;
+          return totalValue >= Number(subValue);
+        });
+      }
+    } else {
+      return (progress[itemName]?.[key] || 0) >= Number(value);
+    }
+  });
+
+  if (isCompleted) {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-4 w-[600px]">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <span className="text-green-500">✓</span>
+            <span className="text-lg font-semibold">
+              {title === 'Материалы для возвышения' ? 'Ресурсы для возвышения собраны' :
+               title === 'Материалы для талантов' ? 'Ресурсы для талантов собраны' :
+               'Ресурсы для прокачки собраны'}
+            </span>
+          </div>
+          <div className="ml-16">
+            <button
+              onClick={() => onEditSection(itemName, title)}
+              className="px-4 py-2 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Изменить ввод ресурсов
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-4">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 mb-4 w-[600px]">
       <h3 className="text-lg font-semibold mb-4">{title}</h3>
       
       {Object.entries(materials).map(([key, value]) => {
@@ -436,11 +525,11 @@ function renderMaterialBlock(
                       type="number"
                       value={progress[itemName]?.[key] || 0}
                       onChange={e => updateProgress(itemName, key, parseInt(e.target.value))}
-                      className="w-16 p-1 rounded bg-gray-100 dark:bg-gray-700 text-right"
+                      className="w-24 p-1 rounded bg-gray-100 dark:bg-gray-700 text-right"
                       min="0"
                       style={{ 
-                        minWidth: '4ch', 
-                        maxWidth: '5ch', 
+                        minWidth: '6ch', 
+                        maxWidth: '8ch', 
                         overflow: 'hidden',
                         textOverflow: 'ellipsis'
                       }}
@@ -456,6 +545,7 @@ function renderMaterialBlock(
                 <h4 className="font-medium mb-2">
                   {key === 'elemental_gems' ? 'Элементальный драгоценный камень' :
                    key === 'mob_drops' ? 'Дроп с мобов' :
+                   key === 'mob_drops_talents' ? 'Дроп с мобов' :
                    key === 'talent_books' ? 'Книги талантов' :
                    key === 'experience' ? 'Опыт персонажа' :
                    key === 'mora_ascension' || key === 'mora_talents' || key === 'mora_experience' ? 'Мора' : key}
@@ -468,11 +558,11 @@ function renderMaterialBlock(
                         type="number"
                         value={progress[itemName]?.[key] || 0}
                         onChange={e => updateProgress(itemName, key, parseInt(e.target.value))}
-                        className="w-16 p-1 rounded bg-gray-100 dark:bg-gray-700 text-right"
+                        className="w-40 p-1 rounded bg-gray-100 dark:bg-gray-700 text-right"
                         min="0"
                         style={{ 
-                          minWidth: '4ch', 
-                          maxWidth: '5ch', 
+                          minWidth: '10ch', 
+                          maxWidth: '12ch', 
                           overflow: 'hidden',
                           textOverflow: 'ellipsis'
                         }}
@@ -496,11 +586,11 @@ function renderMaterialBlock(
                         type="number"
                         value={progress[itemName]?.['опыт_героя'] || 0}
                         onChange={e => updateProgress(itemName, 'опыт_героя', parseInt(e.target.value))}
-                        className="w-16 p-1 rounded bg-gray-100 dark:bg-gray-700 text-right"
+                        className="w-24 p-1 rounded bg-gray-100 dark:bg-gray-700 text-right"
                         min="0"
                         style={{ 
-                          minWidth: '4ch', 
-                          maxWidth: '5ch', 
+                          minWidth: '6ch', 
+                          maxWidth: '8ch', 
                           overflow: 'hidden',
                           textOverflow: 'ellipsis'
                         }}
@@ -514,9 +604,11 @@ function renderMaterialBlock(
                   </div>
                 ) : (
                   Object.entries(value).map(([subKey, subValue]) => {
-                    const crafted = craftedMaterials[subKey];
-                    const dist = distribution[subKey];
-                    const currentValue = progress[itemName]?.[subKey] || 0;
+                    const isTalentMaterial = key === 'mob_drops_talents';
+                    const talentKey = `${subKey}_talents`;
+                    const currentValue = progress[itemName]?.[isTalentMaterial ? talentKey : subKey] || 0;
+                    const crafted = craftedMaterials[isTalentMaterial ? talentKey : subKey];
+                    const dist = distribution[isTalentMaterial ? talentKey : subKey];
                     const totalValue = crafted ? currentValue + crafted.crafted : currentValue;
                     
                     return (
@@ -539,18 +631,18 @@ function renderMaterialBlock(
                           <input
                             type="number"
                             value={currentValue}
-                            onChange={e => updateProgress(itemName, subKey, parseInt(e.target.value))}
-                            className="w-16 p-1 rounded bg-gray-100 dark:bg-gray-700 text-right"
+                            onChange={e => updateProgress(itemName, isTalentMaterial ? talentKey : subKey, parseInt(e.target.value))}
+                            className="w-24 p-1 rounded bg-gray-100 dark:bg-gray-700 text-right"
                             min="0"
                             style={{ 
-                              minWidth: '4ch', 
-                              maxWidth: '5ch', 
+                              minWidth: '6ch', 
+                              maxWidth: '8ch', 
                               overflow: 'hidden',
                               textOverflow: 'ellipsis'
                             }}
                           />
                           <span className="text-sm text-gray-500">
-                            {totalValue} / {String(subValue)}
+                            {`${totalValue} / ${String(subValue)}`}
                           </span>
                         </div>
                       </div>
@@ -569,11 +661,11 @@ function renderMaterialBlock(
                   type="number"
                   value={progress[itemName]?.[key] || 0}
                   onChange={e => updateProgress(itemName, key, parseInt(e.target.value))}
-                  className="w-16 p-1 rounded bg-gray-100 dark:bg-gray-700 text-right"
+                  className="w-24 p-1 rounded bg-gray-100 dark:bg-gray-700 text-right"
                   min="0"
                   style={{ 
-                    minWidth: '4ch', 
-                    maxWidth: '5ch', 
+                    minWidth: '6ch', 
+                    maxWidth: '8ch', 
                     overflow: 'hidden',
                     textOverflow: 'ellipsis'
                   }}
@@ -584,6 +676,17 @@ function renderMaterialBlock(
           );
         }
       })}
+
+      {allResourcesCollected && (
+        <div className="mt-6 flex justify-end">
+          <button
+            onClick={() => onCompleteSection(itemName, title)}
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Подтвердить сбор ресурсов
+          </button>
+        </div>
+      )}
 
       <style>
         {`
@@ -623,11 +726,39 @@ export const Materials = () => {
     const saved = localStorage.getItem('materialProgress');
     return saved ? JSON.parse(saved) : {};
   });
+  const [completedSections, setCompletedSections] = useState<CompletedSections>(() => {
+    const saved = localStorage.getItem('completedSections');
+    return saved ? JSON.parse(saved) : {};
+  });
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     localStorage.setItem('materialProgress', JSON.stringify(progress));
   }, [progress]);
+
+  useEffect(() => {
+    localStorage.setItem('completedSections', JSON.stringify(completedSections));
+  }, [completedSections]);
+
+  const handleCompleteSection = (itemName: string, section: string) => {
+    setCompletedSections(prev => ({
+      ...prev,
+      [itemName]: {
+        ...prev[itemName],
+        [section]: true
+      }
+    }));
+  };
+
+  const handleEditSection = (itemName: string, section: string) => {
+    setCompletedSections(prev => ({
+      ...prev,
+      [itemName]: {
+        ...prev[itemName],
+        [section]: false
+      }
+    }));
+  };
 
   const charactersData: MaterialsData[] = Object.entries(materialsData.characters).map(([name, data]: [string, any]) => ({
     type: 'character',
@@ -741,7 +872,16 @@ export const Materials = () => {
       {selectedItem && (
         <div className="space-y-4">
           {Object.entries(selectedItem.materials).map(([category, materials]) => (
-            renderMaterialBlock(category, materials, progress, selectedItem.name, updateProgress)
+            renderMaterialBlock(
+              category,
+              materials,
+              progress,
+              selectedItem.name,
+              updateProgress,
+              completedSections,
+              handleCompleteSection,
+              handleEditSection
+            )
           ))}
         </div>
       )}
