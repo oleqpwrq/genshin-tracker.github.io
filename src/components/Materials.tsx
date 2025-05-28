@@ -534,7 +534,12 @@ function renderMaterialBlock(
                         textOverflow: 'ellipsis'
                       }}
                     />
-                    <span className="text-sm text-gray-500">/ {String(value.count)}</span>
+                    <span className="text-sm text-gray-500 flex items-center">
+                      {`${progress[itemName]?.[key] || 0} / ${String(value.count)}`}
+                      {(progress[itemName]?.[key] || 0) >= Number(value.count) && (
+                        <span className="text-green-500 ml-2">✓</span>
+                      )}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -558,7 +563,7 @@ function renderMaterialBlock(
                         type="number"
                         value={progress[itemName]?.[key] || 0}
                         onChange={e => updateProgress(itemName, key, parseInt(e.target.value))}
-                        className="w-40 p-1 rounded bg-gray-100 dark:bg-gray-700 text-right"
+                        className="w-48 p-1 rounded bg-gray-100 dark:bg-gray-700 text-right"
                         min="0"
                         style={{ 
                           minWidth: '10ch', 
@@ -567,7 +572,12 @@ function renderMaterialBlock(
                           textOverflow: 'ellipsis'
                         }}
                       />
-                      <span className="text-sm text-gray-500">/ {String(value)}</span>
+                      <span className="text-sm text-gray-500 flex items-center">
+                        {`${progress[itemName]?.[key] || 0} / ${String(value)}`}
+                        {(progress[itemName]?.[key] || 0) >= Number(value) && (
+                          <span className="text-green-500 ml-2">✓</span>
+                        )}
+                      </span>
                     </div>
                   </div>
                 ) : key === 'experience' ? (
@@ -595,10 +605,13 @@ function renderMaterialBlock(
                           textOverflow: 'ellipsis'
                         }}
                       />
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-gray-500 flex items-center">
                         {craftedMaterials['опыт_персонажа'] ? 
                           `${craftedMaterials['опыт_персонажа'].actual} / ${craftedMaterials['опыт_персонажа'].required}` : 
                           '0 / 0'}
+                        {craftedMaterials['опыт_персонажа'] && craftedMaterials['опыт_персонажа'].actual >= craftedMaterials['опыт_персонажа'].required && (
+                          <span className="text-green-500 ml-2">✓</span>
+                        )}
                       </span>
                     </div>
                   </div>
@@ -610,7 +623,8 @@ function renderMaterialBlock(
                     const crafted = craftedMaterials[isTalentMaterial ? talentKey : subKey];
                     const dist = distribution[isTalentMaterial ? talentKey : subKey];
                     const totalValue = crafted ? currentValue + crafted.crafted : currentValue;
-                    
+                    const requiredValue = Number(subValue);
+                    const isCollected = totalValue >= requiredValue;
                     return (
                       <div key={subKey} className="flex justify-between items-center mb-2">
                         <div className="flex flex-col">
@@ -641,8 +655,11 @@ function renderMaterialBlock(
                               textOverflow: 'ellipsis'
                             }}
                           />
-                          <span className="text-sm text-gray-500">
-                            {`${totalValue} / ${String(subValue)}`}
+                          <span className="text-sm text-gray-500 flex items-center">
+                            {`${totalValue} / ${requiredValue}`}
+                            {isCollected && (
+                              <span className="text-green-500 ml-2">✓</span>
+                            )}
                           </span>
                         </div>
                       </div>
@@ -670,7 +687,12 @@ function renderMaterialBlock(
                     textOverflow: 'ellipsis'
                   }}
                 />
-                <span className="text-sm text-gray-500">/ {String(value)}</span>
+                <span className="text-sm text-gray-500 flex items-center">
+                  {`${progress[itemName]?.[key] || 0} / ${String(value)}`}
+                  {(progress[itemName]?.[key] || 0) >= Number(value) && (
+                    <span className="text-green-500 ml-2">✓</span>
+                  )}
+                </span>
               </div>
             </div>
           );
@@ -730,7 +752,7 @@ export const Materials = () => {
     const saved = localStorage.getItem('completedSections');
     return saved ? JSON.parse(saved) : {};
   });
-  const [searchQuery, setSearchQuery] = useState('');
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768);
 
   useEffect(() => {
     localStorage.setItem('materialProgress', JSON.stringify(progress));
@@ -739,6 +761,12 @@ export const Materials = () => {
   useEffect(() => {
     localStorage.setItem('completedSections', JSON.stringify(completedSections));
   }, [completedSections]);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleCompleteSection = (itemName: string, section: string) => {
     setCompletedSections(prev => ({
@@ -808,8 +836,7 @@ export const Materials = () => {
   const allData = [...charactersData, ...weaponsData];
 
   const filteredItems = allData.filter(
-    item => item.type === selectedType && 
-    item.name.toLowerCase().includes(searchQuery.toLowerCase())
+    item => item.type === selectedType
   );
 
   const updateProgress = (itemName: string, matKey: string, value: number) => {
@@ -847,14 +874,6 @@ export const Materials = () => {
         </button>
       </div>
 
-      <input
-        type="text"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        placeholder="Поиск..."
-        className="w-full p-2 rounded bg-gray-100 dark:bg-gray-700"
-      />
-
       <select
         value={selectedItem?.name || ''}
         onChange={(e) => {
@@ -872,19 +891,21 @@ export const Materials = () => {
       {selectedItem && (
         <div className="space-y-4">
           {Object.entries(selectedItem.materials).map(([category, materials]) => (
-            renderMaterialBlock(
-              category,
-              materials,
-              progress,
-              selectedItem.name,
-              updateProgress,
-              completedSections,
-              handleCompleteSection,
-              handleEditSection
-            )
+            <div style={{ width: isMobile ? '100%' : undefined, minWidth: 0 }}>
+              {renderMaterialBlock(
+                category,
+                materials,
+                progress,
+                selectedItem.name,
+                updateProgress,
+                completedSections,
+                handleCompleteSection,
+                handleEditSection
+              )}
+            </div>
           ))}
         </div>
       )}
     </div>
   );
-}; 
+};
