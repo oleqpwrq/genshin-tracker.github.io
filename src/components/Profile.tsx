@@ -7,6 +7,9 @@ interface ProfileSettings {
   avatar: string;
   background: string;
   customBackground: string | null;
+  nickname?: string;
+  uid?: string;
+  headerBg?: string;
 }
 
 interface ProfileProps {
@@ -20,7 +23,10 @@ export const Profile: React.FC<ProfileProps> = ({ onBlurChange, currentBlur }) =
     return saved ? JSON.parse(saved) : {
       avatar: '/genshin-tracker.github.io/images/banner-1.png',
       background: '/genshin-tracker.github.io/images/backgrounds/anime-genshin-impact-genshin-impact-1572562.jpg',
-      customBackground: null
+      customBackground: null,
+      nickname: '',
+      uid: '',
+      headerBg: '/genshin-tracker.github.io/images/backgrounds/anime-genshin-impact-genshin-impact-1572562.jpg'
     };
   });
 
@@ -79,6 +85,46 @@ export const Profile: React.FC<ProfileProps> = ({ onBlurChange, currentBlur }) =
         </div>
       </Card>
 
+      <Card title="Профиль игрока" style={{ marginBottom: '24px', background: 'rgba(255, 255, 255, 0.9)' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <input
+            type="text"
+            placeholder="Никнейм"
+            value={settings.nickname || ''}
+            onChange={e => setSettings(prev => ({ ...prev, nickname: e.target.value }))}
+            style={{ padding: '8px', borderRadius: '8px', border: '1px solid #ccc', width: '100%' }}
+          />
+          <input
+            type="text"
+            placeholder="UID"
+            value={settings.uid || ''}
+            onChange={e => setSettings(prev => ({ ...prev, uid: e.target.value }))}
+            style={{ padding: '8px', borderRadius: '8px', border: '1px solid #ccc', width: '100%' }}
+          />
+        </div>
+      </Card>
+
+      <Card title="Подложка для профиля в хедере" style={{ marginBottom: '24px', background: 'rgba(255, 255, 255, 0.9)' }}>
+        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+          {[
+            '/genshin-tracker.github.io/images/headers/header1.jpg',
+            '/genshin-tracker.github.io/images/headers/header2.jpg',
+            '/genshin-tracker.github.io/images/headers/header3.jpg',
+            '/genshin-tracker.github.io/images/headers/header4.jpg'
+          ].map(bg => (
+            <img
+              key={bg}
+              src={bg}
+              alt="header-bg"
+              style={{
+                width: '120px', height: '60px', objectFit: 'cover', borderRadius: '8px', border: settings.headerBg === bg ? '3px solid #1890ff' : '2px solid #ccc', cursor: 'pointer'
+              }}
+              onClick={() => setSettings(prev => ({ ...prev, headerBg: bg }))}
+            />
+          ))}
+        </div>
+      </Card>
+
       <Card title="Фон приложения" style={{ marginBottom: '24px', background: 'rgba(255, 255, 255, 0.9)' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -89,9 +135,20 @@ export const Profile: React.FC<ProfileProps> = ({ onBlurChange, currentBlur }) =
             />
             <Select
               value={settings.background}
-              onChange={handleBackgroundChange}
+              onChange={value => {
+                setSettings(prev => ({
+                  ...prev,
+                  background: value,
+                  customBackground: null
+                }));
+                // Мгновенно обновляем фон в App через localStorage event
+                window.dispatchEvent(new Event('storage'));
+              }}
               style={{ width: '200px' }}
             >
+              <Select.Option value="/genshin-tracker.github.io/images/backgrounds/background.jpeg">
+                По умолчанию
+              </Select.Option>
               <Select.Option value="/genshin-tracker.github.io/images/backgrounds/anime-genshin-impact-genshin-impact-1572562.jpg">
                 Фон 1
               </Select.Option>
@@ -101,9 +158,6 @@ export const Profile: React.FC<ProfileProps> = ({ onBlurChange, currentBlur }) =
               <Select.Option value="/genshin-tracker.github.io/images/backgrounds/1645057674_5-abrakadabra-fun-p-fon-v-stim-genshin-5.jpg">
                 Фон 3
               </Select.Option>
-              <Select.Option value="/genshin-tracker.github.io/images/banner-1.png">Баннер 1</Select.Option>
-              <Select.Option value="/genshin-tracker.github.io/images/banner-2.png">Баннер 2</Select.Option>
-              <Select.Option value="/genshin-tracker.github.io/images/standard-banner.png">Стандартный баннер</Select.Option>
             </Select>
           </div>
 

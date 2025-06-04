@@ -24,7 +24,7 @@ function App() {
       const settings = JSON.parse(saved);
       return settings.customBackground || settings.background;
     }
-    return '/genshin-tracker/images/banner-1.png';
+    return '/genshin-tracker.github.io/images/banner-1.png';
   });
 
   const [blurAmount, setBlurAmount] = useState(() => {
@@ -33,6 +33,8 @@ function App() {
   });
 
   const { token } = theme.useToken();
+
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768);
 
   useEffect(() => {
     localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
@@ -43,11 +45,15 @@ function App() {
   }, [blurAmount]);
 
   useEffect(() => {
-    const saved = localStorage.getItem('profileSettings');
-    if (saved) {
-      const settings = JSON.parse(saved);
-      setBackground(settings.customBackground || settings.background);
-    }
+    const onStorage = () => {
+      const saved = localStorage.getItem('profileSettings');
+      if (saved) {
+        const settings = JSON.parse(saved);
+        setBackground(settings.customBackground || settings.background);
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
   }, []);
 
   useEffect(() => {
@@ -55,9 +61,18 @@ function App() {
     img.src = background;
     img.onerror = () => {
       console.error('Ошибка загрузки фона:', background);
-      setBackground('/genshin-tracker/images/banner-1.png');
+      setBackground('/genshin-tracker.github.io/images/banner-1.png');
     };
   }, [background]);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const contentPaddingTop = isMobile ? '88px' : '24px';
+  const contentMaxWidth = '1200px';
 
   return (
     <ConfigProvider
@@ -98,7 +113,14 @@ function App() {
         />
         <Layout style={{ minHeight: '100vh', background: 'transparent', position: 'relative', zIndex: 1 }}>
           <Navigation isDarkMode={isDarkMode} toggleDarkMode={() => setIsDarkMode(!isDarkMode)} />
-          <Content style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
+          <Content 
+            style={{ 
+              padding: '24px', 
+              maxWidth: contentMaxWidth, 
+              margin: '0 auto',
+              paddingTop: contentPaddingTop
+            }}
+          >
             <Routes>
               <Route path="/" element={<PrayerCounter />} />
               <Route path="/materials" element={<Materials />} />
