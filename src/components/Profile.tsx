@@ -141,7 +141,6 @@ export const Profile: React.FC<ProfileProps> = ({ onBlurChange, currentBlur }) =
                   background: value,
                   customBackground: null
                 }));
-                // Мгновенно обновляем фон в App через localStorage event
                 window.dispatchEvent(new Event('storage'));
               }}
               style={{ width: '200px' }}

@@ -22,9 +22,15 @@ function App() {
     const saved = localStorage.getItem('profileSettings');
     if (saved) {
       const settings = JSON.parse(saved);
+      if (
+        !settings.customBackground &&
+        (settings.background === undefined || settings.background.includes('background.jpeg'))
+      ) {
+        return '/genshin-tracker.github.io/images/backgrounds/background.jpeg';
+      }
       return settings.customBackground || settings.background;
     }
-    return '/genshin-tracker.github.io/images/banner-1.png';
+    return '/genshin-tracker.github.io/images/backgrounds/background.jpeg';
   });
 
   const [blurAmount, setBlurAmount] = useState(() => {
@@ -49,7 +55,14 @@ function App() {
       const saved = localStorage.getItem('profileSettings');
       if (saved) {
         const settings = JSON.parse(saved);
-        setBackground(settings.customBackground || settings.background);
+        if (
+          !settings.customBackground &&
+          (settings.background === undefined || settings.background.includes('background.jpeg'))
+        ) {
+          setBackground('/genshin-tracker.github.io/images/backgrounds/background.jpeg');
+        } else {
+          setBackground(settings.customBackground || settings.background);
+        }
       }
     };
     window.addEventListener('storage', onStorage);
