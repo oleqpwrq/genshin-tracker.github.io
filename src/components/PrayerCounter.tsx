@@ -30,8 +30,8 @@ export const PrayerCounter: React.FC = () => {
       images: ['/genshin-tracker.github.io/images/banner-1.png'],
       count: 0,
       characters: [
-        { name: 'Эскофье', image: '/genshin-tracker.github.io/images/banner-1.png' },
-        { name: 'Навия', image: '/genshin-tracker.github.io/images/banner-2.png' }
+        { name: 'Кинич', image: '/genshin-tracker.github.io/images/banner-1.png' },
+        { name: 'Райден', image: '/genshin-tracker.github.io/images/banner-2.png' }
       ],
       currentCharacterIndex: 0
     },
@@ -149,7 +149,7 @@ export const PrayerCounter: React.FC = () => {
                       : 'text-gray-700 dark:text-gray-300'
                   }`}
                 >
-                  Баннер Эскофье
+                  Баннер Кинич
                 </button>
                 <button
                   onClick={() => handleCharacterChange(currentBanner.id, 1)}
@@ -159,7 +159,7 @@ export const PrayerCounter: React.FC = () => {
                       : 'text-gray-700 dark:text-gray-300'
                   }`}
                 >
-                  Баннер Навии
+                  Баннер Райден
                 </button>
               </div>
             </div>

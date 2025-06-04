@@ -18,18 +18,34 @@ const DURATIONS = [
 ];
 
 export const Expedition: React.FC = () => {
-  const [state, setState] = useState<ExpeditionState>({
-    selectedDuration: 0,
-    reduced: false,
-    effectiveDuration: 0,
-    startTime: 0,
-    endTime: 0,
-    isRunning: false,
-    isFinished: false
+  const [state, setState] = useState<ExpeditionState>(() => {
+    const saved = localStorage.getItem('expeditionState');
+    return saved ? JSON.parse(saved) : {
+      selectedDuration: 0,
+      reduced: false,
+      effectiveDuration: 0,
+      startTime: 0,
+      endTime: 0,
+      isRunning: false,
+      isFinished: false
+    };
   });
 
-  const [timeLeft, setTimeLeft] = useState<string>('00:00:00');
-  const [progress, setProgress] = useState<number>(0);
+  const [timeLeft, setTimeLeft] = useState<string>(() => {
+    const saved = localStorage.getItem('expeditionTimeLeft');
+    return saved || '00:00:00';
+  });
+  const [progress, setProgress] = useState<number>(() => {
+    const saved = localStorage.getItem('expeditionProgress');
+    return saved ? parseFloat(saved) : 0;
+  });
+
+  // Сохраняем прогресс в localStorage
+  useEffect(() => {
+    localStorage.setItem('expeditionState', JSON.stringify(state));
+    localStorage.setItem('expeditionTimeLeft', timeLeft);
+    localStorage.setItem('expeditionProgress', progress.toString());
+  }, [state, timeLeft, progress]);
 
   useEffect(() => {
     let timer: number;
@@ -136,7 +152,10 @@ export const Expedition: React.FC = () => {
 
         {/* Таймер и прогресс */}
         <div className="space-y-2">
-          <div className="text-2xl font-mono text-center">
+          <div
+            className="text-2xl text-center"
+            style={{ fontFamily: `'JetBrains Mono', 'Fira Mono', 'Consolas', 'monospace'` }}
+          >
             {state.isFinished ? 'Готово!' : timeLeft}
           </div>
           <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">

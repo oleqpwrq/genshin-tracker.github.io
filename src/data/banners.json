@@ -3,11 +3,11 @@
     "name": "Ивентовый баннер",
     "characters": [
       {
-        "name": "Эскофье",
+        "name": "Кинич",
         "image": "/genshin-tracker/images/event-banner-1.png"
       },
       {
-        "name": "Навия",
+        "name": "Райден",
         "image": "/genshin-tracker/images/event-banner-2.png"
       }
     ]

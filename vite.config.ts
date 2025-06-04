@@ -11,5 +11,13 @@ export default defineConfig({
     alias: {
       '@images': path.resolve(__dirname, '@images')
     }
+  },
+  build: {
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+      },
+    },
+    copyPublicDir: true
   }
 }) 

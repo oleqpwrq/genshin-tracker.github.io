@@ -32,6 +32,9 @@ export const Resin = () => {
 
   const [timeToFull, setTimeToFull] = useState('');
 
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(currentResin);
+
   useEffect(() => {
     localStorage.setItem('currentResin', currentResin.toString());
     localStorage.setItem('condensedResin', condensedResin.toString());
@@ -60,23 +63,24 @@ export const Resin = () => {
       const minutesPerResin = 8;
       const maxResin = 200;
       const remainingResin = maxResin - currentResin;
-      const totalMinutes = remainingResin * minutesPerResin;
-
-      const hours = Math.floor(totalMinutes / 60);
-      const minutes = totalMinutes % 60;
-
-      if (hours > 0) {
-        setTimeToFull(`${hours}ч ${minutes}м`);
+      const now = Date.now();
+      const elapsed = Math.floor((now - lastUpdate) / 1000); // секунд с последнего обновления
+      const totalSeconds = remainingResin * minutesPerResin * 60 - elapsed;
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = totalSeconds % 60;
+      if (totalSeconds <= 0) {
+        setTimeToFull('0м 0с');
+      } else if (hours > 0) {
+        setTimeToFull(`${hours}ч ${minutes}м ${seconds}с`);
       } else {
-        setTimeToFull(`${minutes}м`);
+        setTimeToFull(`${minutes}м ${seconds}с`);
       }
     };
-
     calculateTimeToFull();
-    const interval = setInterval(calculateTimeToFull, 60000); // Обновляем каждую минуту
-
+    const interval = setInterval(calculateTimeToFull, 1000); // Обновляем каждую секунду
     return () => clearInterval(interval);
-  }, [currentResin]);
+  }, [currentResin, lastUpdate]);
 
   const handleResinChange = (amount: number) => {
     setCurrentResin(prev => Math.max(0, Math.min(RESIN_MAX, prev + amount)));
@@ -115,7 +119,44 @@ export const Resin = () => {
               />
             </div>
           </div>
-          <span className="ml-4 text-lg font-bold">{currentResin}/{RESIN_MAX}</span>
+          <span className="ml-4 text-lg font-bold flex items-center gap-2">
+            {isEditing ? (
+              <>
+                <input
+                  type="number"
+                  value={editValue}
+                  min={0}
+                  max={RESIN_MAX}
+                  onChange={e => setEditValue(Math.max(0, Math.min(RESIN_MAX, Number(e.target.value))))}
+                  className="w-20 p-1 rounded bg-gray-100 dark:bg-gray-700 text-right border border-gray-300"
+                  style={{ fontSize: '1.1rem' }}
+                />
+                <button
+                  className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                  onClick={() => {
+                    setCurrentResin(editValue);
+                    setIsEditing(false);
+                    setLastUpdate(Date.now());
+                  }}
+                >
+                  Подтвердить
+                </button>
+              </>
+            ) : (
+              <>
+                {currentResin}/{RESIN_MAX}
+                <button
+                  className="ml-2 px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 text-sm"
+                  onClick={() => {
+                    setEditValue(currentResin);
+                    setIsEditing(true);
+                  }}
+                >
+                  Изменить
+                </button>
+              </>
+            )}
+          </span>
         </div>
         <div className="flex space-x-4">
           <button
@@ -172,7 +213,7 @@ export const Resin = () => {
 
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
         <h2 className="text-xl font-semibold mb-4">Слабая смола</h2>
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-10">
           <input
             type="number"
             value={fragileResin}
