@@ -56,6 +56,7 @@ export const Profile: React.FC<ProfileProps> = ({ onBlurChange, currentBlur }) =
       }));
       onSuccess?.('ok');
       message.success('Фон успешно загружен');
+      window.location.href = '/genshin-tracker.github.io/';
     };
     reader.readAsDataURL(file as Blob);
   };
@@ -141,7 +142,7 @@ export const Profile: React.FC<ProfileProps> = ({ onBlurChange, currentBlur }) =
                   background: value,
                   customBackground: null
                 }));
-                window.dispatchEvent(new Event('storage'));
+                window.location.href = '/genshin-tracker.github.io/';
               }}
               style={{ width: '200px' }}
             >
